@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import Transaction from '../models/Transaction';
 
 interface Balance {
@@ -6,23 +7,51 @@ interface Balance {
   total: number;
 }
 
+interface CreateTransactionDTO {
+  title: string;
+  value: number;
+  type: 'income' | 'outcome';
+}
+
 class TransactionsRepository {
-  private transactions: Transaction[];
+  private transactions: Transaction[] = [];
 
   constructor() {
     this.transactions = [];
   }
 
-  public all(): Transaction[] {
-    // TODO
+  public all(): Array<Transaction> {
+    return this.transactions;
   }
 
   public getBalance(): Balance {
-    // TODO
+    const balance = this.transactions.reduce(
+      (sum, transaction) => {
+        if (transaction.type === 'income') {
+          sum.income += transaction.value;
+        } else {
+          sum.outcome += transaction.value;
+        }
+        return sum;
+      },
+      {
+        income: 0,
+        outcome: 0,
+        total: 0,
+      },
+    );
+
+    balance.total = balance.income - balance.outcome;
+
+    return balance;
   }
 
-  public create(): Transaction {
-    // TODO
+  public create({ title, value, type }: CreateTransactionDTO): Transaction {
+    const transaction = new Transaction({ title, value, type });
+
+    this.transactions.push(transaction);
+
+    return transaction;
   }
 }
 
